@@ -23,7 +23,22 @@ if [[ ! -f "$BUILD_OUTPUT/$DLL_NAME" ]]; then
 fi
 
 mkdir -p "$DIST_DIR"
-zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME"
+
+# 公式プラグインと同様に meta.json を ZIP に含める（インストールに必要）
+META_JSON_PATH="$DIST_DIR/meta.json"
+if [[ -f "$MANIFEST_PATH" ]] && command -v jq >/dev/null 2>&1; then
+  jq -c '.[0] | {guid, name, description, overview, owner, category} + .versions[0] | {guid, name, description, overview, owner, category, version, changelog, targetAbi, timestamp} | with_entries(select(.value != null))' \
+    "$MANIFEST_PATH" > "$META_JSON_PATH"
+else
+  echo "Warning: jq または manifest がないため meta.json をスキップします" >&2
+  META_JSON_PATH=""
+fi
+
+if [[ -n "$META_JSON_PATH" ]] && [[ -f "$META_JSON_PATH" ]]; then
+  zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME" "$META_JSON_PATH"
+else
+  zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME"
+fi
 echo "ZIP を作成しました: $ZIP_PATH"
 
 # バージョン取得（AssemblyInfo.cs の AssemblyVersion）
