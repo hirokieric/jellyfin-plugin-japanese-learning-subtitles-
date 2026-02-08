@@ -7,10 +7,11 @@ Jellyfin の二重字幕表示機能と組み合わせることで、英語学�
 
 ## 動作概要
 
-1. ライブラリ内の動画を定期スキャンし、既存の英語 SRT を検出
+1. **動画の詳細ページ**で「日本語字幕を生成」ボタンを押すと、その動画の日本語字幕が生成されます
 2. OpenSubtitles から日本語字幕を取得し、英語字幕のタイムコードに DP アライメント
 3. 日本語字幕が見つからない場合は翻訳 API（OpenAI / DeepL / カスタム）でフォールバック
 4. メディアファイルと同じフォルダに `.ja.srt` として保存
+5. ライブラリ全体を一括処理するスケジュールタスクも引き続き使えます
 
 ---
 
@@ -197,17 +198,41 @@ OpenSubtitles の設定は任意です。未設定の場合、すべての字幕
 
 ---
 
-## タスクの実行
+## 使い方
 
-### 自動実行（スケジュール）
+### 方法 1：動画ごとにオンデマンド生成（推奨）
 
-デフォルトでは毎週日曜日の午前2時に実行されます。
+1. Jellyfin で映画やエピソードの**詳細ページ**を開く
+2. ボタンエリアの下に表示される「**日本語字幕を生成**」ボタンをクリック
+3. ステータスバッジで進捗と結果を確認（英語字幕の有無、生成済みかどうかも表示されます）
 
-管理画面 →「ダッシュボード」→「スケジュールされたタスク」で変更可能です。
+ボタンは管理者ユーザーでログインしている場合のみ表示されます。
 
-### 手動実行
+### 方法 2：ライブラリ一括生成（スケジュールタスク）
 
-管理画面 →「スケジュールされたタスク」→「Generate Japanese Learning Subtitles」→「今すぐ実行」
+ライブラリ全体を一度に処理したい場合は、従来のスケジュールタスクも使えます。
+
+デフォルトでは毎週日曜日の午前2時に自動実行されます。管理画面 →「ダッシュボード」→「スケジュールされたタスク」で変更可能です。
+
+手動で即実行: 管理画面 →「スケジュールされたタスク」→「Generate Japanese Learning Subtitles」→「今すぐ実行」
+
+### REST API
+
+プログラムから直接呼び出すこともできます：
+
+```bash
+# ステータス確認
+curl -H "Authorization: MediaBrowser Token=\"YOUR_TOKEN\"" \
+  http://localhost:8096/JapaneseLearningSubtitles/{itemId}/Status
+
+# 生成実行
+curl -X POST -H "Authorization: MediaBrowser Token=\"YOUR_TOKEN\"" \
+  http://localhost:8096/JapaneseLearningSubtitles/{itemId}/Generate
+
+# 上書き生成
+curl -X POST -H "Authorization: MediaBrowser Token=\"YOUR_TOKEN\"" \
+  "http://localhost:8096/JapaneseLearningSubtitles/{itemId}/Generate?overwrite=true"
+```
 
 ---
 
@@ -245,9 +270,14 @@ TV シリーズの場合:
 Jellyfin.Plugin.JapaneseLearningSubtitles/
 ├── Plugin.cs                          # プラグインエントリポイント
 ├── PluginServiceRegistrator.cs        # DI サービス登録
+├── Api/
+│   └── JapaneseLearningSubtitlesController.cs  # REST API（オンデマンド生成）
+├── Services/
+│   └── SubtitleGenerationService.cs   # 生成処理コアロジック
 ├── Configuration/
 │   ├── PluginConfiguration.cs         # 設定モデル
-│   └── configPage.html                # 管理画面 UI
+│   ├── configPage.html                # 管理画面 UI
+│   └── itemDetailButton.js            # 動画詳細ページのボタン注入 JS
 ├── Srt/
 │   ├── SubtitleCue.cs                 # 字幕キューモデル
 │   ├── SrtParser.cs                   # SRT パーサー
@@ -266,7 +296,7 @@ Jellyfin.Plugin.JapaneseLearningSubtitles/
 ├── Cache/
 │   └── GenerationCacheStore.cs        # 生成キャッシュ（冪等性）
 ├── ScheduledTasks/
-│   └── GenerateJapaneseLearningSubtitlesTask.cs  # スケジュールタスク
+│   └── GenerateJapaneseLearningSubtitlesTask.cs  # 一括スケジュールタスク
 └── Properties/
     └── AssemblyInfo.cs
 

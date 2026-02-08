@@ -1,5 +1,6 @@
 using Jellyfin.Plugin.JapaneseLearningSubtitles.Providers;
 using Jellyfin.Plugin.JapaneseLearningSubtitles.ScheduledTasks;
+using Jellyfin.Plugin.JapaneseLearningSubtitles.Services;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Tasks;
@@ -21,6 +22,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddHttpClient("CustomTranslation");
 
         serviceCollection.AddSingleton<TranslationProviderFactory>();
+        serviceCollection.AddSingleton<SubtitleGenerationService>();
         serviceCollection.AddSingleton<IScheduledTask, GenerateJapaneseLearningSubtitlesTask>();
     }
 }
