@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Japanese Learning Subtitles",
+    "description": "Generates Japanese SRT subtitles aligned to existing English subtitle timings for English learning with dual subtitles.",
+    "overview": "英語字幕のタイミングに合わせて日本語 SRT 字幕を自動生成し、二重字幕で英語学習をサポートします。",
+    "owner": "jellyfin-plugin-japanese-learning-subtitles",
+    "category": "Subtitles",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial release.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/hiroki/jellyfin/releases/download/v1.0.0.0/JapaneseLearningSubtitles.zip",
+        "checksum": "0990e87078bc23fb32d15f0dd8baf065",
+        "timestamp": "2026-02-08T06:06:01Z"
+      }
+    ]
+  }
+]
