@@ -8,12 +8,12 @@
     "category": "Subtitles",
     "versions": [
       {
-        "version": "1.0.0.3",
+        "version": "1.0.0.4",
         "changelog": "各種変更・改善。",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/hirokieric/jellyfin-plugin-japanese-learning-subtitles-/releases/download/v1.0.0.3/JapaneseLearningSubtitles.zip",
-        "checksum": "1d87011b00eaa14a117603e3740d25a6",
-        "timestamp": "2026-02-08T08:13:40Z"
+        "sourceUrl": "https://github.com/hirokieric/jellyfin-plugin-japanese-learning-subtitles-/releases/download/v1.0.0.4/JapaneseLearningSubtitles.zip",
+        "checksum": "b935005156588f33d6ee82285dc5b1cf",
+        "timestamp": "2026-02-08T08:22:09Z"
       }
     ]
   }
