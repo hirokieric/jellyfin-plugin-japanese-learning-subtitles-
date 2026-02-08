@@ -3,6 +3,11 @@
 # 環境変数 RELEASE_ZIP_URL に ZIP の公開 URL を指定すると、manifest.json の sourceUrl と checksum が書き込まれる。
 # 例: RELEASE_ZIP_URL="https://github.com/yourname/jellyfin/releases/download/v1.0.0.0/JapaneseLearningSubtitles.zip" ./build-catalog-package.sh
 # 出力: dist/JapaneseLearningSubtitles.zip, manifest/manifest.json（RELEASE_ZIP_URL 指定時のみ更新）
+#
+# 【リリース手順】必ずこの順で行うこと（逆だと manifest の checksum と GitHub 上の ZIP が一致しなくなる）:
+#   1. RELEASE_ZIP_URL を指定してこのスクリプトを実行
+#   2. 生成された dist/JapaneseLearningSubtitles.zip を GitHub Release にアップロード（gh release upload ... --clobber）
+#   3. manifest の変更をコミット・プッシュ
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -75,6 +80,7 @@ if [[ -n "${RELEASE_ZIP_URL:-}" ]]; then
 else
   echo ""
   echo "RELEASE_ZIP_URL が未設定のため、manifest.json は更新しません。"
-  echo "ZIP を GitHub Releases などにアップロードしたら、次を実行してください："
+  echo "リリースする場合は、先に RELEASE_ZIP_URL を指定してこのスクリプトを実行し、"
+  echo "生成された dist/${PLUGIN_NAME}.zip を GitHub Release にアップロードしてから manifest をコミットしてください。"
   echo "  RELEASE_ZIP_URL='<ZIPの公開URL>' ./build-catalog-package.sh"
 fi
