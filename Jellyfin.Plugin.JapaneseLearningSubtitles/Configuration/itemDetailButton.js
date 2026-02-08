@@ -165,33 +165,49 @@
         // Don't inject twice
         if (document.getElementById(BUTTON_ID)) return;
 
-        // Find the detail page's button area
-        // Jellyfin 10.10 uses detailPageContent → mainDetailButtons
-        // or we can append after the media info area
-        var targets = [
-            document.querySelector('.mainDetailButtons'),
-            document.querySelector('.detailPageContent .detailButtons'),
-            document.querySelector('.detailPageContent')
+        // Jellyfin 10.10+ DOM selectors — try multiple strategies
+        // Strategy 1: After the media info selectors area (字幕 dropdown row)
+        // Strategy 2: After the action buttons row (▶ ↻ etc.)
+        // Strategy 3: Inside the detail page content area
+        var selectors = [
+            // Jellyfin 10.10 selectors
+            '.mediaInfoContent',           // Below the 動画/オーディオ/字幕 area
+            '.itemMiscInfo-primary',        // Below the year/runtime/rating row
+            '.mainDetailButtons',           // After play/action buttons
+            '.detailButtons',               // Alternative button container
+            // Jellyfin 10.9 selectors
+            '.detailPageContent .detailButtons',
+            // Broader fallbacks
+            '[data-type="MediaInfoContent"]',
+            '.detailPagePrimaryContainer',
+            '.detailPageContent',
+            '.itemDetailPage'
         ];
 
         var target = null;
-        for (var i = 0; i < targets.length; i++) {
-            if (targets[i]) {
-                target = targets[i];
-                break;
-            }
+        for (var i = 0; i < selectors.length; i++) {
+            target = document.querySelector(selectors[i]);
+            if (target) break;
         }
 
         if (!target) {
-            // Retry in a moment (page might still be loading)
-            setTimeout(function () { injectUI(itemId); }, 500);
+            // Retry a few times (page might still be loading)
+            if (!injectUI._retries) injectUI._retries = 0;
+            injectUI._retries++;
+            if (injectUI._retries < 10) {
+                setTimeout(function () { injectUI(itemId); }, 500);
+            } else {
+                console.warn('[JLS] Could not find injection point after retries');
+                injectUI._retries = 0;
+            }
             return;
         }
+        injectUI._retries = 0;
 
         // Create container
         var container = document.createElement('div');
         container.id = 'jls-container';
-        container.style.cssText = 'margin:1em 0;padding:0;';
+        container.style.cssText = 'margin:0.8em 0 0.5em 0;padding:0;clear:both;';
 
         var btn = createButton();
         btn.addEventListener('click', function () {
@@ -200,11 +216,11 @@
 
         container.appendChild(btn);
 
-        // Insert after the button area, or append to detail content
-        if (target.classList.contains('mainDetailButtons') || target.classList.contains('detailButtons')) {
+        // Insert after the matched element
+        if (target.nextSibling) {
             target.parentNode.insertBefore(container, target.nextSibling);
         } else {
-            target.appendChild(container);
+            target.parentNode.appendChild(container);
         }
 
         // Load initial status

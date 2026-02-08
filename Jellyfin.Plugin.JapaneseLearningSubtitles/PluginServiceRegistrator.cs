@@ -5,6 +5,7 @@ using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Jellyfin.Plugin.JapaneseLearningSubtitles;
 
@@ -23,6 +24,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddSingleton<TranslationProviderFactory>();
         serviceCollection.AddSingleton<SubtitleGenerationService>();
+        serviceCollection.AddSingleton<ClientScriptInjector>();
+        serviceCollection.AddSingleton<IHostedService, ClientScriptEntryPoint>();
         serviceCollection.AddSingleton<IScheduledTask, GenerateJapaneseLearningSubtitlesTask>();
     }
 }

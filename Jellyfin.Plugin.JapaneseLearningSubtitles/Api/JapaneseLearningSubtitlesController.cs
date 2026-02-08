@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.JapaneseLearningSubtitles.Services;
@@ -16,7 +18,6 @@ namespace Jellyfin.Plugin.JapaneseLearningSubtitles.Api;
 /// </summary>
 [ApiController]
 [Route("JapaneseLearningSubtitles")]
-[Authorize(Policy = "RequiresElevation")]
 public class JapaneseLearningSubtitlesController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
@@ -37,6 +38,30 @@ public class JapaneseLearningSubtitlesController : ControllerBase
     }
 
     /// <summary>
+    /// Serves the client-side JavaScript for the item detail button.
+    /// No authentication required so the script tag in index.html can load it.
+    /// </summary>
+    [HttpGet("ClientScript")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult GetClientScript()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "Jellyfin.Plugin.JapaneseLearningSubtitles.Configuration.itemDetailButton.js";
+
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            return NotFound("Client script resource not found.");
+        }
+
+        using var reader = new StreamReader(stream);
+        var script = reader.ReadToEnd();
+
+        return Content(script, "application/javascript");
+    }
+
+    /// <summary>
     /// Generates Japanese subtitles for a specific item.
     /// </summary>
     /// <param name="itemId">The Jellyfin item ID.</param>
@@ -44,6 +69,7 @@ public class JapaneseLearningSubtitlesController : ControllerBase
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Generation result.</returns>
     [HttpPost("{itemId}/Generate")]
+    [Authorize(Policy = "RequiresElevation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -106,6 +132,7 @@ public class JapaneseLearningSubtitlesController : ControllerBase
     /// <param name="itemId">The Jellyfin item ID.</param>
     /// <returns>Status information.</returns>
     [HttpGet("{itemId}/Status")]
+    [Authorize(Policy = "RequiresElevation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<StatusResponse> GetStatus(
