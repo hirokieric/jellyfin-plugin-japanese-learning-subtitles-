@@ -1,0 +1,20 @@
+# Build
+bin/
+obj/
+dist/
+
+# IDE / OS
+.vs/
+*.user
+*.suo
+.DS_Store
+
+# NuGet
+packages/
+*.nupkg
+
+# Test
+TestResults/
+coverage*.xml
+*.trx
+*.Coverage

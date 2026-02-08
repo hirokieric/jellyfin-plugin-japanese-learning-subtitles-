@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Japanese Learning Subtitles</title>
+</head>
+<body>
+    <div id="JapaneseLearningSubtitlesConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+         data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="JapaneseLearningSubtitlesConfigForm">
+                    <div class="verticalSection">
+                        <h2 class="sectionTitle">Japanese Learning Subtitles Settings</h2>
+                        <p class="fieldDescription">
+                            Generates Japanese SRT subtitles aligned to existing English subtitle timings
+                            for dual-subtitle English learning.
+                        </p>
+                    </div>
+
+                    <!-- OpenSubtitles Section -->
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">OpenSubtitles</h3>
+                        <p class="fieldDescription">
+                            Credentials for fetching Japanese subtitles from OpenSubtitles.
+                            Register at <a href="https://www.opensubtitles.com" target="_blank">opensubtitles.com</a>.
+                        </p>
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtOpenSubtitlesUsername">Username</label>
+                            <input id="txtOpenSubtitlesUsername" type="text" is="emby-input" />
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtOpenSubtitlesPassword">Password</label>
+                            <input id="txtOpenSubtitlesPassword" type="password" is="emby-input" />
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtOpenSubtitlesApiKey">API Key</label>
+                            <input id="txtOpenSubtitlesApiKey" type="password" is="emby-input" />
+                            <div class="fieldDescription">Your OpenSubtitles REST API key.</div>
+                        </div>
+                    </div>
+
+                    <!-- Translation Provider Section -->
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">Translation Provider</h3>
+                        <p class="fieldDescription">
+                            Used when no Japanese subtitles are found on OpenSubtitles.
+                        </p>
+                        <div class="selectContainer">
+                            <label class="selectLabel" for="selectTranslationProvider">Provider</label>
+                            <select id="selectTranslationProvider" is="emby-select">
+                                <option value="0">OpenAI (Recommended)</option>
+                                <option value="1">DeepL</option>
+                                <option value="2">Custom HTTP</option>
+                            </select>
+                        </div>
+                        <div id="openaiSettings">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtOpenAIApiKey">OpenAI API Key</label>
+                                <input id="txtOpenAIApiKey" type="password" is="emby-input" />
+                            </div>
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtOpenAIModel">Model</label>
+                                <input id="txtOpenAIModel" type="text" is="emby-input" />
+                                <div class="fieldDescription">e.g., gpt-4o-mini, gpt-4o</div>
+                            </div>
+                        </div>
+                        <div id="deeplSettings" style="display:none;">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtDeepLApiKey">DeepL API Key</label>
+                                <input id="txtDeepLApiKey" type="password" is="emby-input" />
+                            </div>
+                        </div>
+                        <div id="customSettings" style="display:none;">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtCustomEndpoint">Custom HTTP Endpoint</label>
+                                <input id="txtCustomEndpoint" type="text" is="emby-input" />
+                                <div class="fieldDescription">
+                                    POST endpoint accepting JSON body: {"texts": [...], "source": "en", "target": "ja"}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scan Settings Section -->
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">Scan Settings</h3>
+                        <div class="selectContainer">
+                            <label class="selectLabel" for="selectScanScope">Scope</label>
+                            <select id="selectScanScope" is="emby-select">
+                                <option value="0">Movies &amp; Series</option>
+                                <option value="1">Movies Only</option>
+                                <option value="2">Series Only</option>
+                            </select>
+                        </div>
+                        <div class="checkboxContainer">
+                            <label>
+                                <input id="chkOverwrite" type="checkbox" is="emby-checkbox" />
+                                <span>Overwrite existing .ja.srt files</span>
+                            </label>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtMaxParallel">Max Parallel Processing</label>
+                            <input id="txtMaxParallel" type="number" min="1" max="10" is="emby-input" />
+                            <div class="fieldDescription">Number of items to process concurrently (default: 2).</div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtConfidenceThreshold">Alignment Confidence Threshold</label>
+                            <input id="txtConfidenceThreshold" type="number" min="0" max="1" step="0.05" is="emby-input" />
+                            <div class="fieldDescription">
+                                Below this threshold (0.0-1.0), translation fallback is used instead of aligned OpenSubtitles text.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var JapaneseLearningSubtitlesConfig = {
+            pluginUniqueId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        };
+
+        document.querySelector('#selectTranslationProvider')
+            .addEventListener('change', function () {
+                var val = this.value;
+                document.getElementById('openaiSettings').style.display = val === '0' ? '' : 'none';
+                document.getElementById('deeplSettings').style.display = val === '1' ? '' : 'none';
+                document.getElementById('customSettings').style.display = val === '2' ? '' : 'none';
+            });
+
+        document.querySelector('#JapaneseLearningSubtitlesConfigPage')
+            .addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(JapaneseLearningSubtitlesConfig.pluginUniqueId).then(function (config) {
+                    document.querySelector('#txtOpenSubtitlesUsername').value = config.OpenSubtitlesUsername || '';
+                    document.querySelector('#txtOpenSubtitlesPassword').value = config.OpenSubtitlesPassword || '';
+                    document.querySelector('#txtOpenSubtitlesApiKey').value = config.OpenSubtitlesApiKey || '';
+                    document.querySelector('#selectTranslationProvider').value = config.TranslationProvider || '0';
+                    document.querySelector('#txtOpenAIApiKey').value = config.OpenAIApiKey || '';
+                    document.querySelector('#txtOpenAIModel').value = config.OpenAIModel || 'gpt-4o-mini';
+                    document.querySelector('#txtDeepLApiKey').value = config.DeepLApiKey || '';
+                    document.querySelector('#txtCustomEndpoint').value = config.CustomTranslationEndpoint || '';
+                    document.querySelector('#selectScanScope').value = config.ScanScope || '0';
+                    document.querySelector('#chkOverwrite').checked = config.OverwriteExisting || false;
+                    document.querySelector('#txtMaxParallel').value = config.MaxParallel || 2;
+                    document.querySelector('#txtConfidenceThreshold').value = config.AlignmentConfidenceThreshold || 0.3;
+
+                    // Trigger provider visibility
+                    document.querySelector('#selectTranslationProvider').dispatchEvent(new Event('change'));
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+        document.querySelector('#JapaneseLearningSubtitlesConfigForm')
+            .addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(JapaneseLearningSubtitlesConfig.pluginUniqueId).then(function (config) {
+                    config.OpenSubtitlesUsername = document.querySelector('#txtOpenSubtitlesUsername').value;
+                    config.OpenSubtitlesPassword = document.querySelector('#txtOpenSubtitlesPassword').value;
+                    config.OpenSubtitlesApiKey = document.querySelector('#txtOpenSubtitlesApiKey').value;
+                    config.TranslationProvider = parseInt(document.querySelector('#selectTranslationProvider').value);
+                    config.OpenAIApiKey = document.querySelector('#txtOpenAIApiKey').value;
+                    config.OpenAIModel = document.querySelector('#txtOpenAIModel').value;
+                    config.DeepLApiKey = document.querySelector('#txtDeepLApiKey').value;
+                    config.CustomTranslationEndpoint = document.querySelector('#txtCustomEndpoint').value;
+                    config.ScanScope = parseInt(document.querySelector('#selectScanScope').value);
+                    config.OverwriteExisting = document.querySelector('#chkOverwrite').checked;
+                    config.MaxParallel = parseInt(document.querySelector('#txtMaxParallel').value) || 2;
+                    config.AlignmentConfidenceThreshold = parseFloat(document.querySelector('#txtConfidenceThreshold').value) || 0.3;
+
+                    ApiClient.updatePluginConfiguration(JapaneseLearningSubtitlesConfig.pluginUniqueId, config).then(function () {
+                        Dashboard.processPluginConfigurationUpdateResult();
+                    });
+                });
+                return false;
+            });
+    </script>
+</body>
+</html>

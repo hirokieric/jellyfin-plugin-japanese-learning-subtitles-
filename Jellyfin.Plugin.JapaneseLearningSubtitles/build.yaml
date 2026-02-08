@@ -1,0 +1,24 @@
+---
+name: "Japanese Learning Subtitles"
+guid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+version: "1.0.0.0"
+targetAbi: "10.10.0.0"
+framework: "net8.0"
+owner: "JapaneseLearningSubtitles"
+overview: "Generates Japanese SRT subtitles aligned to existing English subtitle timings for dual-subtitle English learning."
+description: >
+  This plugin periodically scans your Jellyfin library and generates Japanese SRT subtitle files
+  aligned to existing English subtitle timings. It supports fetching existing Japanese subtitles
+  from OpenSubtitles and aligning them, or translating English subtitles to Japanese using
+  OpenAI, DeepL, or a custom HTTP endpoint.
+category: "Subtitles"
+artifacts:
+  - "Jellyfin.Plugin.JapaneseLearningSubtitles.dll"
+changelog: |
+  v1.0.0.0 - Initial release
+  - Library scan with movie/episode filtering
+  - OpenSubtitles integration for Japanese subtitle fetching
+  - Dynamic programming alignment engine
+  - Translation fallback (OpenAI, DeepL, Custom HTTP)
+  - Sidecar .ja.srt naming
+  - Generation caching and idempotency
