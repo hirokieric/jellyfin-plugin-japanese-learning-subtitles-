@@ -20,8 +20,17 @@ if [[ ! -f "$BUILD_OUTPUT/$DLL_NAME" ]]; then
 fi
 
 mkdir -p "$DIST_DIR"
-# -j: パスを付けずにファイル名だけをZIPに含める
-zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME"
+
+# 公式プラグインと同様に meta.json を ZIP に含める（インストールに必要）
+MANIFEST_PATH="$SCRIPT_DIR/manifest/manifest.json"
+META_JSON_PATH="$DIST_DIR/meta.json"
+if [[ -f "$MANIFEST_PATH" ]] && command -v jq >/dev/null 2>&1; then
+  jq -c '.[0] | {guid, name, description, overview, owner, category} + .versions[0] | {guid, name, description, overview, owner, category, version, changelog, targetAbi, timestamp} | with_entries(select(.value != null))' \
+    "$MANIFEST_PATH" > "$META_JSON_PATH"
+  zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME" "$META_JSON_PATH"
+else
+  zip -q -o -j "$ZIP_PATH" "$BUILD_OUTPUT/$DLL_NAME"
+fi
 
 echo "ZIP を作成しました: $ZIP_PATH"
 echo ""
